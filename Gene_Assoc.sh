@@ -1,4 +1,9 @@
-## Notes about GENE_ASSOC.sh
+## Gene_Assoc.sh
+## Shell Script to Perform Rare Variant SKAT Tests on Specific Genes ##
+## This takes in specific parameters and calls several different modules to complete the tests ##
+## April/June, 2014 ##
+## Kristopher Standish ##
+## UCSD/JCVI ##
 
 ###########################################################
 ## 1 ## Set up Paths ######################################
@@ -23,25 +28,25 @@ COV_FILE=$8 # Path to Covariate File or "F"
 COVS=$9 # Which Covariates to Include?
 EIG_VEC=${10} # Output from Plink's --pca command (MAF>1%) of "F"
 PC_COUNT=${11} # How many PCs to Include as Covariates?
-START_STEP=${12}
+START_STEP=${12} # Which Step do you want to start on?
 
 ###########################################################
 ## Constant Paths ##
 
-# Tools
+# Public Tools
 GATK_JAR=/projects/janssen/Tools/gatk2.7-2/GenomeAnalysisTK.jar
 REF_FA=/projects/janssen/ref/ref.fa
 VCF_TOOLS=/projects/janssen/Tools/vcftools_0.1.11/bin/vcftools
 PLINK=/projects/janssen/Tools/plink_linux_x86_64/plink 
 GENE_TABLE=/home/kstandis/HandyStuff/GG-Gene_Names_DB.txt
-GET_ALL_GENE_ANNOT_PY=/home/kstandis/RV/Get_All_Gene_Annot.py
-GET_GENE_ANNOT_PY=/home/kstandis/RV/Get_Gene_Annot.py
-SKAT_R=/home/kstandis/RV/GENE_SKAT.R
+# Custom Scripts
 COMPILE_GENE_COORDS_R=/home/kstandis/RV/COMPILE_GENE_COORDS.R
-GENE_MANH=/home/kstandis/RV/Gene_Manhattan.R
-PLOT_SKAT_TESTS_R=/home/kstandis/RV/PLOT_SKAT_TESTS.R
+GET_ALL_GENE_ANNOT_PY=/home/kstandis/RV/Get_All_Gene_Annot.py
 GET_FUNC_VARS_R=/home/kstandis/RV/GET_FUNC_VARS.R
 MAKE_COV_TAB_R=/home/kstandis/RV/Make_Cov_Tab.R
+GENE_MANH=/home/kstandis/RV/Gene_Manhattan.R
+SKAT_R=/home/kstandis/RV/GENE_SKAT.R
+PLOT_SKAT_TESTS_R=/home/kstandis/RV/PLOT_SKAT_TESTS.R
 
 ###########################################################
 ## Pull some Info out of Parameters ##
@@ -96,7 +101,7 @@ printf "V\nV\nV\nV\nV\nV\nV\nV\n"
 
 fi
 ###########################################################
-## 2 ## Make sure I've got coordinates ####################
+## 2 ## Verify/Retrieve Gene Coordinates ##################
 ###########################################################
 if [ "$START_STEP" -le 2 ]; then
  # Either give coordinates in input or search for them
@@ -106,7 +111,7 @@ echo \### 2 - `date` \###
 echo \### Retreiving and Compiling Gene Coordinates \###
 echo `date` "2 - Retreiving and Compiling Gene Coordinates" >> ${UPDATE_FILE}
 
-N_COL=`head -1 ${GENE_LIST} | awk '{print NF}'`
+N_COL=`head -1 ${GENE_LIST} | awk '{print NF}'` # Determine how many columns are in the Gene List
 if [ $N_COL = 1 ] # If Only Gene Name is Given (Not Coordinates)
 then
 echo Only Gene Name Given
@@ -116,7 +121,7 @@ mkdir ${ASSOC}/${G}
 awk -F $'\t' -v GENE="$G" '{ if ( $15 == GENE ) print $2":"$3"-"$4 }' ${GENE_TABLE} > ${ASSOC}/${G}/${G}.list
 sed -i 's/chr//g' ${ASSOC}/${G}/${G}.list
 done
-else # If Coordinates are Given Too
+else # If Coordinates are Given Also
 echo Gene Names and Coordinates Provided
 IFSo=$IFS
 IFS=$'\n' # Makes it so each line is read whole (not separated by tabs)

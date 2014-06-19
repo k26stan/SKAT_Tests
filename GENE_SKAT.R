@@ -120,6 +120,7 @@ start_gene_loop <- proc.time()
 for (i in 1:length(GENE_TAB)) {
 	print(paste("Running Skat on Gene",i,"of",length(GENE_TAB)))
 	GENE <- GENE_TAB[i]
+	write(paste(Sys.time(),"- Running Skat on:",GENE,"-",i,"of",length(GENE_TAB)),PathToUpdate,append=T)
 
 #############################################
 ## SET PATHS and LOAD GENOTYPE DATA #########
@@ -135,8 +136,6 @@ Thrsh_Pos_Nm <- paste(PATH, "/", GENE, "/", GENE, ".Thrsh.list", sep="")
 print(paste("Gene:",GENE,"-","Loading Genotype Information"))
 G_Names <- as.character(read.table(paste(Full_Array,".indv",sep=""), sep="\t", header=F)[,1])
 G_Locs <- read.table(paste(Full_Array,".pos",sep=""), sep="\t", header=F, colClasses=c("factor","numeric"))
-
-write(paste(Sys.time(),"- Running Skat on:",GENE,"-",i,"of",length(GENE_TAB),"- (",nrow(G_Locs),"Total Vars )"),PathToUpdate,append=T)
 
 File_Flag <- 0
 if (file.exists(Full_Array)==T) {
